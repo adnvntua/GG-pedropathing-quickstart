@@ -23,7 +23,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name = "roblox_copy_1")
 public class roblox_copy_1 extends LinearOpMode {
-
+//ur a gay ducking money
 
 
 

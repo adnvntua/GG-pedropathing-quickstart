@@ -24,6 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 @TeleOp(name = "roblox_copy_1")
 public class roblox_copy_1 extends LinearOpMode {
 //ur e bike is not coming
+    //like bro isn't all that
 
 
 

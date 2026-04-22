@@ -27,7 +27,7 @@ public class roblox_copy_1 extends LinearOpMode {
     // then plug those numbers in here.
     static final int    SLIDE_GROUND        = 0;       // Fully retracted / resting
     static final int    SLIDE_LOW           = 300;     // Low basket height
-    static final int    SLIDE_MID           = 700;     // Mid scoring height
+    static final int    SLIDE_MID           = 700;     // Mid-scoring height
     static final int    SLIDE_HIGH          = 1400;    // High basket / max extension
 
     // Power sent to slide motors while driving to a preset (0.0–1.0).
@@ -59,6 +59,10 @@ public class roblox_copy_1 extends LinearOpMode {
     static final double CLAW_OPEN           = 0.25;   // Open to grab or release
     static final double CLAW_CLOSE          = 0.70;   // Closed to grip sample
 
+    // --- GRABBER SERVO POSITIONS
+    static final double GRABBER_OPEN = 0.20;
+    static final double GRABBER_CLOSED = 0.70;
+
     // How much a servo moves PER LOOP when held for fine adjustment (right stick).
     // Smaller = finer tuning. Good range: 0.005 (very fine) – 0.03 (coarser).
     static final double SERVO_INCREMENT     = 0.015;
@@ -75,6 +79,9 @@ public class roblox_copy_1 extends LinearOpMode {
 
     // Continuous-rotation intake rollers
     Servo LEFT_INTAKE, RIGHT_INTAKE;
+
+    // Grabber servos
+    Servo LEFT_GRABBER, RIGHT_GRABBER;
 
     // Arm servos
     Servo ELBOW;   // Rotates the arm up/down
@@ -143,29 +150,28 @@ public class roblox_copy_1 extends LinearOpMode {
         RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // --- Slide motors (DcMotorEx for encoder position control) ---
-        SLIDE_LEFT  = hardwareMap.get(DcMotorEx.class, "slide_left");
-        SLIDE_RIGHT = hardwareMap.get(DcMotorEx.class, "slide_right");
+        SLIDE_LEFT  = hardwareMap.get(DcMotorEx.class, "slideleft");
 
         // One motor must be reversed so both extend the slides in the same direction.
         // If slides fight each other, swap FORWARD/REVERSE on one of them.
         SLIDE_LEFT.setDirection(DcMotorSimple.Direction.FORWARD);
-        SLIDE_RIGHT.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // BRAKE: slides hold their position when power is removed (no drift)
         SLIDE_LEFT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        SLIDE_RIGHT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Zero the encoders at startup — all preset positions are relative to this
         SLIDE_LEFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        SLIDE_RIGHT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // RUN_USING_ENCODER lets the motor use encoder feedback for smoother power
         SLIDE_LEFT.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        SLIDE_RIGHT.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // --- Intake continuous-rotation servos ---
         LEFT_INTAKE  = hardwareMap.get(Servo.class, "leftintake");
         RIGHT_INTAKE = hardwareMap.get(Servo.class, "rightintake");
+
+        // --- Grabber servos
+        LEFT_GRABBER = hardwareMap.get(Servo.class, "leftgrabber");
+        RIGHT_GRABBER = hardwareMap.get(Servo.class, "rightgrabber");
 
         // --- Arm / claw servos ---
         ELBOW = hardwareMap.get(Servo.class, "elbow"); // Arm pivot up/down
@@ -187,6 +193,8 @@ public class roblox_copy_1 extends LinearOpMode {
         CLAW.setPosition(CLAW_CLOSE);         // Start clamped so nothing falls out
         LEFT_INTAKE.setPosition(INTAKE_STOP); // Intake stopped
         RIGHT_INTAKE.setPosition(INTAKE_STOP);
+        LEFT_GRABBER.setPosition(GRABBER_CLOSED);
+        RIGHT_GRABBER.setPosition(GRABBER_CLOSED);
 
         waitForStart(); // Hang here until the referee presses START on the Driver Hub
 
@@ -229,9 +237,7 @@ public class roblox_copy_1 extends LinearOpMode {
             // Redefines "forward" for field-centric to wherever the robot is currently pointing.
             // Use this if the robot spins out and field-centric gets confused.
             if (gamepad1.y && !lastYawReset) {
-                imu.resetYaw(); // Zero the heading — robot's current direction becomes "forw
-
-                // ard"
+                imu.resetYaw(); // Zero the heading — robot's current direction becomes "forward"
             }
             lastYawReset = gamepad1.y;
 

@@ -149,14 +149,18 @@ public class roblox_copy_1 extends LinearOpMode {
         LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // --- Slide motors (DcMotorEx for encoder position control) ---
+        // --- Shoulder motor
+        SHOULDER = hardwareMap.get(DcMotorEx.class, "shoulder");
+
+        
+
+        // --- Slide motor (DcMotorEx for encoder position control) ---
         SLIDE_LEFT  = hardwareMap.get(DcMotorEx.class, "slideleft");
 
-        // One motor must be reversed so both extend the slides in the same direction.
         // If slides fight each other, swap FORWARD/REVERSE on one of them.
         SLIDE_LEFT.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        // BRAKE: slides hold their position when power is removed (no drift)
+        // BRAKE: slide hold its position when power is removed (no drift)
         SLIDE_LEFT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Zero the encoders at startup — all preset positions are relative to this

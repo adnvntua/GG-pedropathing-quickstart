@@ -74,8 +74,11 @@ public class roblox_copy_1 extends LinearOpMode {
     // Mecanum drive motors
     DcMotor   LF, RF, LB, RB;
 
+    // Shoulder motor
+    DcMotor Shoulder;
+
     // Linear slide motors — DcMotorEx gives access to encoder target-position API
-    DcMotorEx SLIDE_LEFT, SLIDE_RIGHT;
+    DcMotorEx SLIDE_LEFT;
 
     // Continuous-rotation intake rollers
     Servo LEFT_INTAKE, RIGHT_INTAKE;
@@ -150,9 +153,7 @@ public class roblox_copy_1 extends LinearOpMode {
         RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // --- Shoulder motor
-        SHOULDER = hardwareMap.get(DcMotorEx.class, "shoulder");
-
-        
+        Shoulder = hardwareMap.dcMotor.get("shoulder");
 
         // --- Slide motor (DcMotorEx for encoder position control) ---
         SLIDE_LEFT  = hardwareMap.get(DcMotorEx.class, "slideleft");
@@ -323,13 +324,10 @@ public class roblox_copy_1 extends LinearOpMode {
             if (Math.abs(manualSlide) > 0.1) {           // Deadband: ignore stick drift < 10%
                 // Switch to raw power mode — no encoder target, just direct drive
                 SLIDE_LEFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                SLIDE_RIGHT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 SLIDE_LEFT.setPower(manualSlide  * SLIDE_MANUAL_POWER); // Scale by manual power constant
-                SLIDE_RIGHT.setPower(manualSlide * SLIDE_MANUAL_POWER);
             } else if (SLIDE_LEFT.getMode() == DcMotor.RunMode.RUN_WITHOUT_ENCODER) {
                 // Stick was released, and we were in manual mode — stop and hold
                 SLIDE_LEFT.setPower(0);
-                SLIDE_RIGHT.setPower(0);
                 // NOTE: To add PID holding later, call setSlideTo(currentPosition) here
                 //       so the motor holds position via RUN_TO_POSITION.
             }
@@ -387,7 +385,6 @@ public class roblox_copy_1 extends LinearOpMode {
 
             telemetry.addLine("=== SLIDES ===");
             telemetry.addData("  Left  Ticks (current)", SLIDE_LEFT.getCurrentPosition());
-            telemetry.addData("  Right Ticks (current)", SLIDE_RIGHT.getCurrentPosition());
             telemetry.addData("  Mode",                  SLIDE_LEFT.getMode());
             // ^ Use these tick values to set SLIDE_LOW / MID / HIGH constants above
 
@@ -414,17 +411,14 @@ public class roblox_copy_1 extends LinearOpMode {
     private void setSlideTo(int targetTicks) {
         // Tell both motors where to go (in encoder ticks)
         SLIDE_LEFT.setTargetPosition(targetTicks);
-        SLIDE_RIGHT.setTargetPosition(targetTicks);
 
         // RUN_TO_POSITION: the motor uses its internal controller to reach the target.
         // It will hold position once it arrives (as long as power > 0).
         SLIDE_LEFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        SLIDE_RIGHT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Apply power — motor internally limits itself to not overshoot the target.
         // This is NOT a speed cap; it determines how aggressively the motor drives toward the target.
         SLIDE_LEFT.setPower(SLIDE_POWER);
-        SLIDE_RIGHT.setPower(SLIDE_POWER);
     }
 
     // =========================================================================

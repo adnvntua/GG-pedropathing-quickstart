@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 // Registers this class as a TeleOp opmode visible in the Driver Hub menu
-@TeleOp(name = "GearGurus_TeleOp")
+@TeleOp(name = "roblox_copy_1")
 public class roblox_copy_1 extends LinearOpMode {
 
     // =========================================================================
@@ -78,7 +78,7 @@ public class roblox_copy_1 extends LinearOpMode {
     DcMotor Shoulder;
 
     // Linear slide motors — DcMotorEx gives access to encoder target-position API
-    DcMotorEx SLIDE_LEFT;
+    DcMotorEx SLIDE_LEFT, SLIDE_RIGHT;
 
     // Continuous-rotation intake rollers
     Servo LEFT_INTAKE, RIGHT_INTAKE;
@@ -153,22 +153,27 @@ public class roblox_copy_1 extends LinearOpMode {
         RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // --- Shoulder motor
-        Shoulder = hardwareMap.dcMotor.get("shoulder");
+        Shoulder = hardwareMap.get(DcMotor.class, "shouldermoter");
 
         // --- Slide motor (DcMotorEx for encoder position control) ---
         SLIDE_LEFT  = hardwareMap.get(DcMotorEx.class, "slideleft");
+        SLIDE_RIGHT  = hardwareMap.get(DcMotorEx.class, "slideright");
 
         // If slides fight each other, swap FORWARD/REVERSE on one of them.
         SLIDE_LEFT.setDirection(DcMotorSimple.Direction.FORWARD);
+        SLIDE_RIGHT.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // BRAKE: slide hold its position when power is removed (no drift)
         SLIDE_LEFT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        SLIDE_RIGHT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Zero the encoders at startup — all preset positions are relative to this
         SLIDE_LEFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        SLIDE_RIGHT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // RUN_USING_ENCODER lets the motor use encoder feedback for smoother power
         SLIDE_LEFT.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        SLIDE_RIGHT.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // --- Intake continuous-rotation servos ---
         LEFT_INTAKE  = hardwareMap.get(Servo.class, "leftintake");
@@ -328,6 +333,7 @@ public class roblox_copy_1 extends LinearOpMode {
             } else if (SLIDE_LEFT.getMode() == DcMotor.RunMode.RUN_WITHOUT_ENCODER) {
                 // Stick was released, and we were in manual mode — stop and hold
                 SLIDE_LEFT.setPower(0);
+                SLIDE_RIGHT.setPower(0);
                 // NOTE: To add PID holding later, call setSlideTo(currentPosition) here
                 //       so the motor holds position via RUN_TO_POSITION.
             }
@@ -386,6 +392,8 @@ public class roblox_copy_1 extends LinearOpMode {
             telemetry.addLine("=== SLIDES ===");
             telemetry.addData("  Left  Ticks (current)", SLIDE_LEFT.getCurrentPosition());
             telemetry.addData("  Mode",                  SLIDE_LEFT.getMode());
+            telemetry.addData("  RIGHT  Ticks (current)", SLIDE_RIGHT.getCurrentPosition());
+            telemetry.addData("  Mode",                  SLIDE_RIGHT.getMode());
             // ^ Use these tick values to set SLIDE_LOW / MID / HIGH constants above
 
             telemetry.addLine("=== INTAKE ===");
@@ -411,14 +419,17 @@ public class roblox_copy_1 extends LinearOpMode {
     private void setSlideTo(int targetTicks) {
         // Tell both motors where to go (in encoder ticks)
         SLIDE_LEFT.setTargetPosition(targetTicks);
+        SLIDE_RIGHT.setTargetPosition(targetTicks);
 
         // RUN_TO_POSITION: the motor uses its internal controller to reach the target.
         // It will hold position once it arrives (as long as power > 0).
         SLIDE_LEFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        SLIDE_RIGHT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Apply power — motor internally limits itself to not overshoot the target.
         // This is NOT a speed cap; it determines how aggressively the motor drives toward the target.
         SLIDE_LEFT.setPower(SLIDE_POWER);
+        SLIDE_RIGHT.setPower(SLIDE_POWER);
     }
 
     // =========================================================================

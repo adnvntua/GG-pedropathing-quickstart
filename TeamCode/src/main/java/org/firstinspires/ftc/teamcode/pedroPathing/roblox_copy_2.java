@@ -152,7 +152,11 @@ public class roblox_copy_2 extends LinearOpMode {
         RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // --- Shoulder motor
-        Shoulder = hardwareMap.get(DcMotor.class, "shouldermoter");
+        Shoulder = hardwareMap.get(DcMotor.class, "shouldermotor");
+
+        Shoulder.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        Shoulder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // --- Slide motors (DcMotorEx for encoder position control) ---
         SLIDE_LEFT  = hardwareMap.get(DcMotorEx.class, "slide_left");
